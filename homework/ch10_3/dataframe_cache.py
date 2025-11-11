@@ -14,13 +14,38 @@ company_ind_schema = "company_id LONG, industry STRING"
 # employees counts Load
 company_emp_df = spark.read \
     .option("header", "true") \
+    .option('multiLine', 'true') \
     .schema(company_emp_schema) \
     .csv(company_emp_path)
 company_emp_df.persist()
 emp_cnt = company_emp_df.count()
 print(f"Employee counts: {emp_cnt}")
 
+# employee_count 중복제거
+company_emp_dedup_df = company_emp_df.dropDuplicates(['company_id'])
+emp_dedup_df = company_emp_dedup_df.count()
+print(f"Employee deduplicated counts: {emp_dedup_df}")
 
+# industry info Load
+company_idu_df = spark.read \
+    .option('header', 'true') \
+    .option('multiLine', 'true') \
+    .schema(company_ind_schema) \
+    .csv(company_ind_path)
+company_idu_df.persist()
+idu_cnt = company_idu_df.count()
+print(f"Industry counts: {idu_cnt}")
+
+company_it_df = company_idu_df.filter(col('industry') == 'Information Technology and Services')
+
+company_emp_cnt_df = company_emp_dedup_df.join(
+    other = company_it_df,
+    on = 'company_id',
+    how = 'inner'
+).select('company_id', 'employee_count').sort(col('employee_count'), ascending=False)
+
+company_emp_cnt_df.show()
+time.sleep(300)
 # # SparkSession 생성
 # spark = SparkSession.builder.appName("Homework_ch10_3").getOrCreate()
 
