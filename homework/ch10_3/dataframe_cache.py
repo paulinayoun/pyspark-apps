@@ -2,6 +2,7 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from time import sleep
 
+# SparkSession 생성
 spark = SparkSession.builder.appName("Homework_ch10_3").getOrCreate()
 
 # 파일 경로 정의
@@ -19,7 +20,7 @@ industries_df = spark.read \
     .schema(schema_industries) \
     .csv(path_industries)
 
-industries_df.persist()  # 메모리에 캐싱
+industries_df.persist()
 print("Industries count:", industries_df.count())
 
 # 회사별 종업원 수 정보 로드
@@ -31,3 +32,13 @@ employees_df = spark.read \
 
 employees_df.persist()
 print("Employees count:", employees_df.count())
+
+# 테스트용으로 5행씩 출력
+print("=== Sample from industries_df ===")
+industries_df.show(5)
+
+print("=== Sample from employees_df ===")
+employees_df.show(5)
+
+# 프로그램 유지 (unpersist 하지 말고)
+sleep(300)
