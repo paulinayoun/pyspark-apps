@@ -31,10 +31,6 @@ jobs_df = spark.read \
     .schema(jobs_schema) \
     .csv(jobs_df)
 
-# 조인 수행 전 확인
-jobs_df.persist()
-jobs_df.show()
-
 # # 조인 수행, skills DataFrame을 broadcast 처리
 # join_df = jobs_df.join(
 #     other = broadcast(skills_df),
@@ -56,6 +52,6 @@ join_df = jobs_df.join(
     .agg(count('job_id').alias('job_count')) \
     .sort('job_count', ascending=False)
 
-join_df.show(20)
+print(join_df.count())
 
 time.sleep(1200)
