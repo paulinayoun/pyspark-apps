@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, broadcast
+from pyspark.sql.functions import col, broadcast, count
 from time import sleep
 
 spark = SparkSession \
@@ -35,17 +35,27 @@ jobs_df = spark.read \
 jobs_df.persist()
 jobs_df.show()
 
-# 조인 수행, skills DataFrame을 broadcast 처리
+# # 조인 수행, skills DataFrame을 broadcast 처리
+# join_df = jobs_df.join(
+#     other = broadcast(skills_df),
+#     on = 'skill_abr')
+
+# # 최종 데이터프레임 컬럼 ['skill_name','job_count'] 기준 내림차순
+# result_df = join_df.groupBy('skill_name') \
+#     .count() \
+#     .withColumnRenamed('count', 'job_count') \
+#     .sort(col('job_count').desc())
+
+# 조인 수행, jobs DataFrame을 broadcast 처리
 join_df = jobs_df.join(
     other = broadcast(skills_df),
-    on = 'skill_abr')
+    on = 'skill_abr',
+    how = 'inner'
+).select('job_id', 'skill_name') \
+    .groupBy('skill_name') \
+    .agg(count('job_id').alias('job_count')) \
+    .sort('job_count', ascending=False)
 
-# 최종 데이터프레임 컬럼 ['skill_name','job_count'] 기준 내림차순
-result_df = join_df.groupBy('skill_name') \
-    .count() \
-    .withColumnRenamed('count', 'job_count') \
-    .sort(col('job_count').desc())
-
-result_df.show(20)
+join_df.show(20)
 
 time.sleep(1200)
