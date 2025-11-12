@@ -1,6 +1,6 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col, broadcast, count
-from time import sleep
+from pyspark.sql.functions import broadcast, count
+import time
 
 spark = SparkSession \
     .builder \
