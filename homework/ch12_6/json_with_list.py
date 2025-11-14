@@ -33,6 +33,7 @@ def for_each_batch_func(df: DataFrame, epoch_id):
     from_json_df.printSchema()
     json_schema = from_json_df.schema
     print(json_schema)
+
     json_to_col_df = from_json_df.select('person_info.*') \
                                  .selectExpr('name',
                                              'address.*',
@@ -53,7 +54,7 @@ spark = SparkSession \
 kafka_source_df = spark.readStream \
                 .format("kafka") \
                 .option("kafka.bootstrap.servers", "kafka01:9092,kafka02:9092,kafka03:9092") \
-                .option("subscribe", "lesson.spark-streaming.person_info") \
+                .option("subscribe", "lesson.spark-streaming.person_info_2") \
                 .option('startingOffsets','latest') \
                 .option('failOnDataLoss','false') \
                 .load() \
